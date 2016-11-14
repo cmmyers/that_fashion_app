@@ -1,0 +1,62 @@
+﻿*-ish
+
+
+
+
+I have opted (at Dan’s recommendation) to go with the fashion-analysis project, using data scraped from chictopia.com. My ultimate goal is to use information from a user’s activity and ground truth about fashion trends of the last ~8 years to predict upcoming trends. As an intermediary goal and a way to get familiar with the data, I will create a model to predict whether a user will have a large number of followers (power-user). 
+
+
+1. Describe your techniques: break the data pipeline into portions and describe each one.
+
+
+First, I scrape. Then, I sanitize and featurize.
+There are a lot of potential features on any given photo page. Number of comments. Number of photos. Description. Etc etc etc. 
+I will need to decide how to classify a power-user. 
+
+
+1. Can you anticipate problems, what are they, do you need to overcome them now? How do you overcome them?
+
+
+It’s possible the scraping will be hard. It’s possible I will be totally overwhelmed by the data and not know where to start. 
+
+
+I plan to use AWS computing power to split up the scraping work. 
+I plan to stay positive. 
+
+
+1. How far do you anticipate to take the project in the allotted time frame?
+
+
+As above, I really want to get far enough that am able to identify emerging trends. I hope to get to something a little more sexy than just predicting power-users. 
+
+
+1. Any other repos, libraries and other tools that you're considering using? Are you citing them? Are you acknowledging them for their contribution?
+There are some papers I need to read more thoroughly. They refer to a dataset of chictopia information, but it doesn’t seem to be publicly available. I am assuming they scraped it just like I plan to do. 
+http://www.cv-foundation.org/openaccess/content_cvpr_2015/papers/Simo-Serra_Neuroaesthetics_in_Fashion_2015_CVPR_paper.pdf
+http://hi.cs.waseda.ac.jp/~esimo/publications/SimoSerraCVPR2016.pdf
+
+
+These are some github repos that could be useful:
+https://github.com/grahamar/fashion_dataset
+
+
+https://github.com/RobertoRiera/photo_by_tag
+
+
+This person wrote a chictopia scraper but I want to make sure I can write my own
+https://github.com/NicePit/scrape/blob/master/chictopia_scrape.py
+
+
+I’m not exactly sure what’s going on here but it might be interesting:
+https://github.com/NicePit/scrape/blob/master/chictopia_scrape.py
+
+
+1. Data
+   * should be a CSV or something similar representing a feature matrix
+   * if the data requires specialized processing (e.g. MIDI files converted to feature matrix), you should provide the processed data
+   * if the data is not tabular (i.e. can't be represented in CSV), it should should otherwise be fully processed so that it's immediately consumable by your ML algorithms
+   * you don't have to include all your data, but you must include at least a few rows
+   * if you're scraping, do not provide only a link to a website; provide the data already scraped.
+
+
+I am in the process of scraping. I have scraped 2455 pages (and counting) and plan to set up EMR to speed up this process. Currently the data is in the form of unicode HTML strings, which I will parse using BeatifulSoup and then extract info I care about.
