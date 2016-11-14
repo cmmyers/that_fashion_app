@@ -26,8 +26,9 @@ def extract_feats(html):
     fd = {}
 
     #find title of post
-    title = soup.find("h1", { "class":"photo_title"})
-    fd['title'] = title.text
+    #this one works
+    title = soup.find("h1", { "class":"photo_title"}).text
+    fd['title'] = title
 
     #find date of post
     #how to extract date? has to do with finding sibs or children
@@ -62,7 +63,30 @@ def extract_feats(html):
     desc = soup.find("div", {"id", "photo_description"})
     fd['photo_desc'] = desc
 
-    #
+    #find links to garments
+    links = soup.find({"class": "garmentLinks"})
+    fd['garment_links'] = links
+
+    #find styleCouncl status
+    sc = soup.find("div", {"class":"help"})
+    fd['style_council'] = sc
+
+    #find number of followers
+    followers = soup.find("div", {"id":"follow"}).text
+    fd['followers'] = followers
+
+    #find username
+    username = soup.find("div",{ "id":"name_div"}).findChildren("a")
+    fd['username'] = username
+
+
+    #find location
+    location = soup.find("div", {"id":"loc_div"}).findChilren("a")
+    fd['location'] = location
+
+    #find num chic points
+    chic_points = soup.find("div", {"id": "av_info"})
+    fd['chic_points'] = chic_points
 
     ''''''
     return fd
