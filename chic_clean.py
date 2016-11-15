@@ -26,66 +26,89 @@ def extract_feats(html):
     fd = {}
 
     #find title of post
-    #this one works
     title = soup.find("h1", { "class":"photo_title"}).text
     fd['title'] = title
-
     #find date of post
-    #how to extract date? has to do with finding sibs or children
-    #fd['date'] = title.findNextSibling.find().text
+    date = soup.find("meta", {"itemprop":"dateCreated"}).get("content")
+    fd['date'] = date
 
     #find smaller photos url
-    subs = soup.find("div", {"class":"subphoto_items"})
-    sub_photos = subs.findChildren("img")
-    fd['subphotos'] = sub_photos
+    sub_photos = soup.find("div", {"class":"subphoto_items"})
+    if sub_photos is not None:
+        sub_photos = sub_photos.findChildren("img")
+        sub_photos = [photo.get("src") for photo in sub_photos]
+        fd['subphotos'] = sub_photos
+    else:
+        fd['subphotos'] = "n/a"
 
     #find main photo
-    main_photo = soup.find("div", {"id" : "image_wrap"}).findChildren("img")
+    main_photo = soup.find("div", {"id" : "image_wrap"}).findChild("img").get("src")
     fd['main_photo'] = main_photo
 
     #number of votes for this post
-    votes = soup.find("div", {"id": "vote_text_100000", "class": "left action_unclicked_show cursor"}).text
-    fd['votes'] = votes
+    votes = soup.find("div", {"id": "vote_text_100000"})
+    if votes is not None:
+        votes = votes.text
+        votes = int(votes.split()[0])
+        fd['votes'] = votes
+    else:
+        fd['votes'] = 0
 
     #number of comments for this post
-    comments = soup.find("div", {"id": "comment_text_100000", "class": "left action_unclicked_show cursor"}).text
-    fd['comments'] = comments
+    comments = soup.find("div", {"id": "comment_text_100000"})
+    if comments is not None:
+        comments = comments.text
+        comments = int(comments.split()[0])
+        fd['comments'] = comments
+    else:
+        fd['comments'] = 0
 
     #number of favorites for this post
-    faves = soup.find("div", {"id": "favorite_text_100000", "class": "left action_unclicked_show cursor"}).text
-    fd['favorites'] = faves
+    faves = soup.find("div", {"id": "favorite_text_100000"})
+    if faves is not None:
+        faves = faves.text
+        faves = int(faves.split()[0])
+        fd['favorites'] = faves
+    else:
+        fd['faves'] = 0
 
     #find all tags
-    tags = soup.find("div", {"id": "tag_boxes"})
+    tags = soup.find("div", {"id": "tag_boxes"}).findChildren("a")
+    tags = [tag.text for tag in tags]
     fd['tags'] = tags
 
     #find description
-    desc = soup.find("div", {"id", "photo_description"})
+    desc = soup.find("div", {"id": "photo_description"}).text
     fd['photo_desc'] = desc
 
     #find links to garments
-    links = soup.find({"class": "garmentLinks"})
+    links = soup.find("div",{"class": "garmentLinks"})
     fd['garment_links'] = links
 
     #find styleCouncl status
-    sc = soup.find("div", {"class":"help"})
-    fd['style_council'] = sc
+    style_council = soup.find("div", {"class":"help"}).findChild("img").get("alt")
+    fd['style_council'] = style_council
 
     #find number of followers
     followers = soup.find("div", {"id":"follow"}).text
     fd['followers'] = followers
 
     #find username
-    username = soup.find("div",{ "id":"name_div"}).findChildren("a")
+    username = soup.find("div",{ "id":"name_div"}).findChild("a").text
     fd['username'] = username
 
 
     #find location
-    location = soup.find("div", {"id":"loc_div"}).findChilren("a")
-    fd['location'] = location
+    location = soup.find("div", {"id":"loc_div"}).findChild("a")
+    if location is not  None:
+        location = location.text
+        fd['location'] = location
+    else:
+        fd['location'] = "n/a"
 
     #find num chic points
-    chic_points = soup.find("div", {"id": "av_info"})
+    chic_points = soup.find("div", {"itemprop": "author"}).findChildren("div", {"class":"px10"})[2].text
+    chic_points = chic_points.split()[0]
     fd['chic_points'] = chic_points
 
     ''''''
@@ -99,7 +122,7 @@ def view_entry():
 
 if __name__ == '__main__':
     # path = raw_input("Please enter the path to the json file you would like to clean ")
-    path = 'chic_export_1.json'
+    path = 'chic_export_24.json'
     is_exists = []
     check = []
     features_collect = []
@@ -109,6 +132,7 @@ if __name__ == '__main__':
             status = check_status(entry['html'])
             if status == 'passed':
                 features = extract_feats(entry['html'])
+                features['id'] = entry['id']
                 features_collect.append(features)
                 is_exists.append(entry['id'])
             elif status == 'check':
