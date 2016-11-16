@@ -169,9 +169,12 @@ def extract_feats(html):
     #find num chic points
     chic_points = soup.find("div", {"itemprop": "author"})
     if chic_points is not None:
-        chic_points = chic_points.findChildren("div", {"class":"px10"})[2].text
-        chic_points = chic_points.split()[0]
-        fd['chic_points'] = int(chic_points)
+        try:
+            chic_points = chic_points.findChildren("div", {"class":"px10"})[2].text
+            chic_points = chic_points.split()[0]
+            fd['chic_points'] = int(chic_points)
+        except IndexError:
+            fd['chic_points'] = 0
     else:
         fd['chic_points'] = 0
 
@@ -187,40 +190,41 @@ def view_entry():
 if __name__ == '__main__':
 
 
-    #path = raw_input("Please enter the path to the json file you would like to clean ")
-    path = '../chic_data/chic_0-5000.json'
+    path = raw_input("Please enter the path to the json file you would like to clean ")
+    #path = '../chic_data/chic_0-5000.json'
     is_exists = []
     check = []
     features_collect = []
 
     client = MongoClient('mongodb://localhost:27017/')
-    db = client['parsedA']
-    print "Using database {}".format(db)
-    #db_name = raw_input("Database name: ")
-    collection = raw_input("Collection name: ")
+    #db_name = 'parsedA'
+    db_name = raw_input("Database name: ")
+    db = client[db_name]
+    print "Using database {}".format(db_name)
 
+    collection = raw_input("Collection name: ")
 
     posts = db[collection]
 
+    present_ids = posts.distinct['id']
     ct = 1
     passed_ct = 0
     with open(path) as json_data:
         for line in json_data:
-            if ct > 1040:
-                entry = json.loads(line)
-                status = check_status(entry['html'])
-                if status == 'passed':
-                    features = extract_feats(entry['html'])
-                    features['id'] = int(entry['id'])
+            entry = json.loads(line)
+            status = check_status(entry['html'])
+            if status == 'passed':
+                features = extract_feats(entry['html'])
+                features['id'] = int(entry['id'])
+                if features['id'] not in posts.distinct('id'):
                     posts.insert_one(features)
-                    features_collect.append(features)
-                    is_exists.append(entry['id'])
-                    passed_ct += 1
-                elif status == 'check':
-                    check.append(entry['id'])
+                features_collect.append(features)
+                is_exists.append(entry['id'])
+                passed_ct += 1
+            elif status == 'check':
+                check.append(entry['id'])
             ct += 1
             if ct%20 == 0:
                 print "checked {} records of which {} passed and have been parsed".format(ct, passed_ct)
-            if passed_ct == 1000:
-                break
+
         json_data.close()
