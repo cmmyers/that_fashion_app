@@ -29,7 +29,7 @@ def extract_feats(html):
     '''
 
     soup = BeautifulSoup(html, "html.parser")
-    #features dictionary
+    #features dictionary to return
     fd = {}
 
     #find post id for reference
@@ -56,7 +56,7 @@ def extract_feats(html):
     else:
         fd['date'] = "No Date"
 
-    #find smaller photos url
+    #find smaller photos urls
     sub_photos = soup.find("div", {"class":"subphoto_items"})
     if sub_photos is not None:
         sub_photos = sub_photos.findChildren("img")
@@ -128,7 +128,7 @@ def extract_feats(html):
     else:
         fd['garment_links'] = None
 
-    #find styleCouncl status
+    #find styleCouncil status
     style_council = soup.find("div", {"class":"help"})
     if style_council is not None:
         style_council = style_council.findChild("img").get("alt")
@@ -178,17 +178,18 @@ def extract_feats(html):
     else:
         fd['chic_points'] = 0
 
-    ''''''
     return fd
 
+
+
 def view_entry():
+    '''for checking on the state of things'''
     with open(path) as json_data:
         for line in json_data:
             print json.loads(line)['html']
 
 
 if __name__ == '__main__':
-
 
     path = raw_input("Please enter the path to the json file you would like to clean ")
     #path = '../chic_data/chic_0-5000.json'
@@ -216,10 +217,9 @@ if __name__ == '__main__':
             if status == 'passed':
                 features = extract_feats(entry['html'])
                 features['id'] = int(entry['id'])
-                if features['id'] not in posts.distinct('id'):
+                if features['id'] not in present_ids:
                     posts.insert_one(features)
                 features_collect.append(features)
-                is_exists.append(entry['id'])
                 passed_ct += 1
             elif status == 'check':
                 check.append(entry['id'])
