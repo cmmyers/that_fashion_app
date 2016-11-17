@@ -195,8 +195,7 @@ def view_entry():
             print json.loads(line)['html']
 
 
-if __name__ == '__main__':
-
+def do_clean():
     path = raw_input("Please enter the path to the json file you would like to clean ")
     #path = '../chic_data/chic_0-5000.json'
     is_exists = []
@@ -237,3 +236,7 @@ if __name__ == '__main__':
                 print "checked {} records of which {} passed and have been parsed".format(ct, passed_ct)
 
         json_data.close()
+
+
+if __name__ == '__main__':
+    print "I am the cleaner"

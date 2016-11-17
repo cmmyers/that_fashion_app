@@ -1,8 +1,5 @@
 import matplotlib.pyplot as plt
-
-#to do: go back to the source and deal with the date issue there
-#get a list of 20 trends for 2008-2009
-
+import pandas as pd
 
 class Trend(object):
 
@@ -22,14 +19,18 @@ class Trend(object):
 
         term_frequencies_by_day = []
         rng = pd.date_range(date_begin, date_end)
-        for date in range:
-            #create a mini-df for posts on each date in range
-            segment = df[df.date == date]
-            ct = 0
-            for desc in segment:
-                if self.phrase in segment.description:
-                    ct += 1
+        print rng
+
+        for a_date in rng:
+            mask = df.datetime == a_date
+            segment = df[mask]
+            segment = segment.photo_desc
+            for row in segment:
+                ct = 0
+                if self.phrase in row:
+                    ct+=1
             term_frequencies_by_day.append(ct)
+
         #plot dates on x axis, frequency on y-axis
         tf_plot = plt.plot(rng, term_frequencies_by_day)
         return tf_plot
