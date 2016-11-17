@@ -1,6 +1,7 @@
 from pymongo import MongoClient
 import json
 from bs4 import BeautifulSoup
+import datetime
 
 
 def check_status(html):
@@ -49,12 +50,17 @@ def extract_feats(html):
         fd['title'] = 'No Title'
 
     #find date of post
+
+    #OMG THIS IS DRIVING ME CUH_RAZY
+
     date = soup.find("meta", {"itemprop":"dateCreated"})
     if date is not None:
         date = date.get("content")
-        fd['date'] = date.encode('ascii', 'ignore')
+        date = date.split('-')
+        date = [int(num) for num in date]
+        fd['date'] = date
     else:
-        fd['date'] = "No Date"
+        fd['date'] = [2008, 03, 01]
 
     #find smaller photos urls
     sub_photos = soup.find("div", {"class":"subphoto_items"})
@@ -207,7 +213,10 @@ if __name__ == '__main__':
 
     posts = db[collection]
 
-    present_ids = posts.distinct['id']
+    if posts.find().count() > 0:
+        present_ids = posts.distinct['id']
+    else:
+        present_ids = []
     ct = 1
     passed_ct = 0
     with open(path) as json_data:

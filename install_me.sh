@@ -1,4 +1,7 @@
 #!/bin/sh
+
+#for getting everything ready to go on the EC2s I'm using for scraping
+
 sudo apt-get update  # To get the latest package lists
 sudo apt-get install python -y
 sudo apt install python-pip -y
