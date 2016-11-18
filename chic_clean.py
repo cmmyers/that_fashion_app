@@ -36,8 +36,11 @@ def extract_feats(html):
     #find post id for reference
     post_id = soup.find("input", {"id" :"photo_id"})
     if post_id is not None:
-        post_id = int(post_id.get("value"))
-        fd['post_id'] = post_id
+        try:
+            post_id = int(post_id.get("value"))
+            fd['post_id'] = post_id
+        except ValueError:
+            fd['post_id'] = 0
     else:
         fd['post_id'] = 0
 
