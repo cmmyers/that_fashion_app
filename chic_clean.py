@@ -15,13 +15,15 @@ def check_status(html):
     soup = BeautifulSoup(html, "html.parser")
     output = ''
     text = str(soup.find())
-
-    if text.startswith('<response [200]') or text.startswith('<response [404]'):
+    try:
+        if text.startswith('<response [200]') or text.startswith('<response [404]'):
+            output = 'check'
+        elif soup.title.text == u"The page you are looking for doesn't exist | Chictopia":
+            output = "DNE"
+        else:
+            output = "passed"
+    except AttributeError:
         output = 'check'
-    elif soup.title.text == u"The page you are looking for doesn't exist | Chictopia":
-        output = "DNE"
-    else:
-        output = "passed"
 
     return output
 
@@ -64,6 +66,15 @@ def extract_feats(html):
         fd['date'] = date
     else:
         fd['date'] = [2008, 03, 01]
+
+    #extract date wrapper because above date extraction misses some dates.
+
+    date_wrapper = soup.find("div", {"id":"title_bar"})
+    if date_wrapper is not None:
+        fd['date_wrapper'] = str(date_wrapper)
+    else:
+        fd['date_wrapper'] = 'Unknown'
+
 
     #find smaller photos urls
     sub_photos = soup.find("div", {"class":"subphoto_items"})
@@ -137,6 +148,13 @@ def extract_feats(html):
     else:
         fd['garment_links'] = None
 
+    #second shot at getting ALL garment links
+    links = soup.find("div",{"class": "garmentLinks"})
+    if links is not None:
+        fd['garment_links_all'] = str(links)
+    else:
+        fd['garment_links_all'] = "none"
+
     #find styleCouncil status
     style_council = soup.find("div", {"class":"help"})
     if style_council is not None:
@@ -165,15 +183,15 @@ def extract_feats(html):
         fd['username'] = "No Username"
 
 
-    #find location
-    location = soup.find("div", {"id":"loc_div"})
-    if location is not None:
-        location = location.findChild("a")
+    #find location wrapper and location
+    location_wrapper = soup.find("div", {"id":"loc_div"})
+    if location_wrapper is not None:
+        location = location_wrapper.findChild("a")
         if location is not None:
             location = location.text
             fd['location'] = location.encode('ascii', 'ignore')
     else:
-        fd['location'] = "n/a"
+        fd['location'] = "Somewhere on Earth"
 
     #find num chic points
     chic_points = soup.find("div", {"itemprop": "author"})
@@ -215,7 +233,7 @@ def do_clean():
 
     posts = db[collection]
 
-    if posts.find().count() > 0:
+    if posts.count() > 0:
         present_ids = posts.distinct['id']
     else:
         present_ids = []
@@ -225,6 +243,7 @@ def do_clean():
         for line in json_data:
             entry = json.loads(line)
             status = check_status(entry['html'])
+
             if status == 'passed':
                 features = extract_feats(entry['html'])
                 features['id'] = int(entry['id'])

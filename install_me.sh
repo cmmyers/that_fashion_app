@@ -27,3 +27,8 @@ sudo pip install pandas
 sudo pip install numpy
 sudo pip install bs4
 sudo pip install requests
+# sudo pip install sklearn
+# sudo pip install matplotlib
+# sudo pip install seaborn
+# sudo pip install ipython
+# pip install gensim
