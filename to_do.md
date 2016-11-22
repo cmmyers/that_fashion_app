@@ -37,3 +37,14 @@ aggregate all already scraped posts on VA
 ****unmount volume
 ****log out of instance
 ****stop instance
+
+----
+
+goals for November 22
+
+again, aggregate what you have
+
+make a page discussing everything you've done so far
+
+return to the simple word2vec model and find words that are in a similar
+space as "dress", "shoe", "pant", etc....

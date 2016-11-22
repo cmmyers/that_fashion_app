@@ -8,6 +8,10 @@ ssh -i ~/.ssh/g_cl.pem ubuntu@52.90.199.187
 
 jupyter location on VA3:
 
+ ~/.local/bin/jupyter-notebook eda.ipynb --no-browser --NotebookApp.ip='0.0.0.0' --NotebookApp.port=8885
+
+
+ ssh -NfL 8885:localhost:8885 -i /dataxvdf/g_cl.pem  ubuntu@52.90.38.63
 
 
 

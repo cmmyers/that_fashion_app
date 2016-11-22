@@ -14,8 +14,11 @@ def make_df(database, collection):
     return df
 
 def add_columns(df):
-
-    df['desc_length'] = [len(desc) for desc in df['photo_desc'].values]
+    for desc in df['photo_desc'].values:
+        try:
+            df['desc_length'] = len(desc)
+        except TypeError:
+            df['desc_length'] = 0
     df['num_subphotos'] = [0 if entry=='No Subphotos' else len(entry) for entry in df['subphotos']]
     #get the date into fucking recognizable date format
     df['datetime'] = coerce_to_datetime(df.date)
