@@ -1,7 +1,7 @@
 from gensim.models import Word2Vec
 from nltk.corpus import stopwords
 
-class W2V4Trends(Word2Vec):
+class W2V4Trends():
 
     def __init__(self, model):
         self.model = model
@@ -73,7 +73,7 @@ class W2V4Trends(Word2Vec):
             i=0
             if root_word_first:
                 while i < (len(text)-1):
-                    
+
                     if text[i] != root_word:
                         new_text.append(text[i])
                         i += 1
