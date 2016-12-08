@@ -11,22 +11,23 @@ class W2V4Trends():
     def update_stopwords(self, ask = False, colors = True):
         boring_words = ["cool", "pretty", "awesome", "fantastic", "new", "favorite"]
         if colors:
-            boring_words.append(["red", "black"])
+            boring_words += ["red", "black"]
         if ask:
-            more_boring_words = self.ask_for_manual_stopwords()
-            boring_words.append(more_boring_words)
-        man_sw = manual_stopwords(boring_words)
+            more_boring_words = self._ask_for_manual_stopwords()
+            boring_words += more_boring_words
+        man_sw = self.manual_stopwords(boring_words)
         all_sw = set(self.stopwords + man_sw)
+
 
         self.stopwords = all_sw
 
-    def ask_for_manual_stopwords(self):
+    def _ask_for_manual_stopwords(self):
         cont = True
         boring_words = []
         while cont:
             new_word = raw_input("Please enter a base word or type DONE when done: ")
             if new_word.upper() == "DONE":
-                cont == False
+                cont = False
             else:
                 boring_words.append(new_word)
 
@@ -35,11 +36,11 @@ class W2V4Trends():
     def manual_stopwords(self, boring_words):
         sw = []
         for word in boring_words:
-            sw.append(collect_similar(word, self.model, 10))
+            sw.append(self.collect_similar(word, 10))
 
-        return set([item for l in man_sw for item in l])
+        return [item for l in sw for item in l]
 
-    def collect_similar(self, word, model, n_output):
+    def collect_similar(self, word, n_output):
         '''
         INPUT: word = a base vocabulary word
             model = a trained word2vec model (or path in the form Word2Vec.open('model_path'))
@@ -72,36 +73,42 @@ class W2V4Trends():
         try:
             i=0
             if root_word_first:
-                while i < (len(text)-1):
+                try:
+                    while i < (len(text)-1):
 
-                    if text[i] != root_word:
-                        new_text.append(text[i])
-                        i += 1
-                    elif text[i+1] in self.stopwords:
-                        new_text.append(text[i])
-                        i += 1
-                    else:
-                        new_text.append('{}_{}'.format(text[i], text[i+1]))
-                        i += 2
+                        if text[i] != root_word:
+                            new_text.append(text[i])
+                            i += 1
+                        elif text[i+1] in self.stopwords:
+                            new_text.append(text[i])
+                            i += 1
+                        else:
+                            new_text.append('{}_{}'.format(text[i], text[i+1]))
+                            i += 2
 
-                if text[-2] != root_word:
-                    new_text.append(text[-1])
+                    if text[-2] != root_word:
+                        new_text.append(text[-1])
+                except TypeError:
+                    new_text.append('')
 
             else:
-                while i < (len(text)-1):
+                try:
+                    while i < (len(text)-1):
 
-                    if text[i+1] != root_word:
-                        new_text.append(text[i])
-                        i+=1
-                    elif text[i] in self.stopwords:
-                        new_text.append(text[i])
-                        i+=1
-                    else:
-                        new_text.append('{}_{}'.format(text[i], text[i+1]))
-                        i+=2
+                        if text[i+1] != root_word:
+                            new_text.append(text[i])
+                            i+=1
+                        elif text[i] in self.stopwords:
+                            new_text.append(text[i])
+                            i+=1
+                        else:
+                            new_text.append('{}_{}'.format(text[i], text[i+1]))
+                            i+=2
 
-                if text[-1] != root_word:
-                    new_text.append(text[-1])
+                    if text[-1] != root_word:
+                        new_text.append(text[-1])
+                except TypeError:
+                    new_text.append('')
 
         except IndexError:
             new_text.append('')
@@ -119,11 +126,11 @@ class W2V4Trends():
         RETURNS: a list of [lists of modified word tokens]
         '''
 
-        root_words = collect_similar(word, self.model, num_sim)
+        root_words = self.collect_similar(word, num_sim)
         new_texts = []
         for text in text_series:
             for word in root_words:
-                text = make_bigrams(text, word, self.stopwords)
+                text = self.make_bigrams(text, word)
             new_texts.append(text)
         return new_texts
 
@@ -138,5 +145,5 @@ class W2V4Trends():
 
         basic_garments = ["dress", "pants", "shirt", "shoes", "bag"]
         for garment in basic_garments:
-            text_series = bigrams_for_similar_garments(text_series, garment, model, stopwords, num_sim)
+            text_series = self.bigrams_for_similar_garments(text_series, garment, num_sim)
         return text_series
