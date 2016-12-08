@@ -150,16 +150,18 @@ class Trend(object):
 
         plt.plot(x_axis, y_axis, label=self.phrase)
 
-    def differences(self, df, start_month, start_year, num_months):
-        tfm, tpm, month_year_tuples = self.get_tpm_tfm(df, start_month, start_year, num_months)
-        freq_ratio = np.array(tfm * 1.0)/np.array(tpm)
+    def differences(self, df, col_name, start_month, start_year, num_months):
+        tf_matrix = self.get_tfm_tpm(df, col_name, start_month, start_year, num_months)
+        freq_ratio =  tf_matrix[1]*1.0/tf_matrix[2]
+
         abs_dif_month_over_month = []
         mag_dif_month_over_month = []
         for i in xrange(0, num_months - 12):
             abs_dif_month_over_month.append(freq_ratio[i + 12] - freq_ratio[i])
         for j in xrange(0, num_months - 12):
             mag_dif_month_over_month.append(abs_dif_month_over_month[j]/freq_ratio[j])
-        return freq_ratio, abs_dif_month_over_month, mag_dif_month_over_month, month_year_tuples
+        return {'month_yr': tf_matrix[0], 'freq_ratio':freq_ratio, 'abs_dif_m_over_m': abs_dif_month_over_month, \
+            'mag_dif_m_over_m': mag_dif_month_over_month}
 
     def plot_differences(self, df, start_month, start_year, num_months):
 
@@ -188,11 +190,11 @@ class Trend(object):
 
         return abs_difs, mag_difs
 
-    def get_tpm_tfm(self, df, start_month, start_year, num_months):
+    def get_tfm_tpm(self, df, col_name, start_month, start_year, num_months):
         '''
         Creates a plot showing the term frequency of the Trend
         over a given date range, by month, (using a rolling average over 3 months).
-        INPUT: dataframe contaiing dates and descriptions,
+        INPUT: dataframe contaiing dates and descriptions, name of column w/ tokenized descriptions,
                 starting month and year, number of months to plot
         OUTPUT: matplotlib object
         '''
@@ -227,7 +229,7 @@ class Trend(object):
             df_yr = df[yr_mask]
             mo_mask = df_yr.month == tup[1]
             df_mo = df_yr[mo_mask]
-            segment = df_mo.photo_desc
+            segment = df_mo[col_name]
             ct = 0
             total = 0
             for row in segment:
@@ -236,15 +238,13 @@ class Trend(object):
                     ct+=1
             tf_by_mo.append(ct)
 
-
             #so we don't try to divide by 0
             tp_by_mo.append(total + 1)
-
 
         tfm = np.array(tf_by_mo)
         tpm = np.array(tp_by_mo)
         my_tuples = month_year_tuples
-        return tfm, tpm, my_tuples
+        return [my_tuples, tfm, tpm]
 
     def get_tfy_tpy(self, df, start_year, end_year):
         tf_by_yr = []
@@ -252,7 +252,7 @@ class Trend(object):
         for yr in xrange(start_year, end_year + 1):
             yr_mask = df.year == yr
             df_yr = df[yr_mask]
-            segment = df_yr.photo_desc
+            segment = df_yr.tokenized_descs
             ct = 0
             total = 0
             for row in segment:
